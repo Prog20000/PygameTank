@@ -14,74 +14,6 @@ rim = False
 
 USERNAME = None
 glav = True
-
-
-def draw_intro():
-    imgtank = pygame.image.load('tanki.jpg')
-    words = pygame.font.SysFont('calibri', 45)
-    text_welcome = words.render('Игра "Танки"', True, 'white')
-    name = 'Введите имя:'
-    is_find_name = False
-    while not is_find_name:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit(0)
-            elif event.type == pygame.KEYDOWN:
-                if event.unicode.isalpha():
-                    if name == 'Введите имя:':
-                        name = event.unicode
-                    else:
-                        name += event.unicode
-                elif event.key == pygame.K_BACKSPACE:
-                    name = name[:-1]
-                elif event.key == pygame.K_RETURN:
-                    if len(name) > 2:
-                        global USERNAME
-                        USERNAME = name
-                        is_find_name = True
-                        break
-
-        sc.fill('black')
-        text_name = words.render(name, True, 'white')
-        rect_name = text_name.get_rect()
-        rect_name.center = sc.get_rect().center
-        sc.blit(pygame.transform.scale(imgtank, [200, 200]), [10, 10])
-        sc.blit(text_welcome, (250, 60))
-        sc.blit(text_name, rect_name)
-        pygame.display.update()
-        sc.fill('black')
-
-
-draw_intro()
-
-
-def draw_game_over():
-    words = pygame.font.SysFont('calibri', 35)
-    word = pygame.font.SysFont('calibri', 25)
-    text_gameover = words.render('Игра завершена!', True, 'white')
-    text_score = words.render(f'Ваш счет: {100}', True, 'white')
-    text_i = word.render('Для рестарта игры нажмите клавишу пробел', True, 'white')
-    imgtank = pygame.image.load('tanki.jpg')
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit(0)
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    draw_intro()
-
-        sc.fill('black')
-        sc.blit(text_gameover, (230, 60))
-        sc.blit(pygame.transform.scale(imgtank, [200, 200]), [10, 10])
-        sc.blit(text_score, (30, 250))
-        sc.blit(text_i, (15, 400))
-        pygame.display.update()
-
-        sc.fill('black')
-
-
 x = 266
 y = 532
 mi = 225
@@ -90,6 +22,10 @@ r = 10
 y1 = y
 all_sprites = pygame.sprite.Group()
 prep_coordinates = [[76, 76, 'n'], [76, 152, 'n'], [76, 266, 'r']]
+mine = [[228, 190], [304, 228], [190, 380]]
+kopy = mine
+mine1 = [[304, 190], [76, 380], [190, 266]]
+death = False
 
 
 def load_image(name, colorkey=None):
@@ -123,6 +59,7 @@ vrag = load_image("vrag.jpg")
 vrag2 = load_image("vrag2.jpg")
 vrag3 = load_image("vrag3.jpg")
 vrag4 = load_image("vrag4.jpg")
+mina = load_image("mina.jpg")
 mata = False
 kount = 0
 lu = True
@@ -130,7 +67,8 @@ mark1 = True
 pol = 0
 pira = True
 vy = 0
-while 1:
+running = True
+while running:
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             sys.exit()
@@ -143,6 +81,9 @@ while 1:
                     x -= 38
                     if x == 76 and y == 266:
                         mata = True
+                    for ku in range(len(mine)):
+                        if x == mine[ku][0] and y == mine[ku][1]:
+                            death = True
                     pol = 3
                 pira = True
             elif i.key == pygame.K_RIGHT:
@@ -153,6 +94,9 @@ while 1:
                     x += 38
                     if x == 76 and y == 266:
                         mata = True
+                    for ku in range(len(mine)):
+                        if x == mine[ku][0] and y == mine[ku][1]:
+                            death = True
                     pol = 1
                 pira = True
             if i.key == pygame.K_UP:
@@ -163,8 +107,12 @@ while 1:
                     y -= 38
                     if x == 76 and y == 266:
                         mata = True
+                    for ku in range(len(mine)):
+                        if x == mine[ku][0] and y == mine[ku][1]:
+                            death = True
                     if y < 0:
                         y = 532
+                        mine = mine1
                         bg = load_image("4444.jpg")
                     pol = 0
                 pira = True
@@ -176,9 +124,13 @@ while 1:
                     y += 38
                     if x == 76 and y == 266:
                         mata = True
+                    for ku in range(len(mine)):
+                        if x == mine[ku][0] and y == mine[ku][1]:
+                            death = True
                     if y > 532:
                         y = 0
                         bg = load_image("3333.jpg")
+                        mine = kopy
                     pol = 2
                 pira = True
             elif i.key == pygame.K_SPACE:
@@ -186,7 +138,8 @@ while 1:
     if pol == 0:
         sc.blit(bg, (0, 0))
         all_sprites.draw(sc)
-
+        for i in range(len(mine)):
+            sc.blit(mina, (mine[i][0], mine[i][1]))
         sc.blit(prep, (76, 76))
         sc.blit(prep2, (76, 152))
         if mark1:
@@ -194,6 +147,9 @@ while 1:
         elif not mark1 and not mata:
             sc.blit(zv, (76, 266))
         sc.blit(image, (x, y))
+        if death:
+            os.system('python finish.py')
+            break
         if rim:
             x1 = x
             y1 = y
@@ -205,6 +161,8 @@ while 1:
                 sc.blit(prep2, (76, 152))
                 sc.blit(image, (x, y))
                 sc.blit(image1, (x + 18, y1))
+                for i in range(len(mine)):
+                    sc.blit(mina, (mine[i][0], mine[i][1]))
                 if mark1:
                     sc.blit(prep1, (76, 266))
                 elif not mark1 and not mata:
@@ -228,11 +186,16 @@ while 1:
         sc.blit(bg, (0, 0))
         sc.blit(prep, (76, 76))
         sc.blit(prep2, (76, 152))
+        for i in range(len(mine)):
+            sc.blit(mina, (mine[i][0], mine[i][1]))
         if mark1:
             sc.blit(prep1, (76, 266))
         elif not mark1 and not mata:
             sc.blit(zv, (76, 266))
         sc.blit(imagek1, (x, y))
+        if death:
+            os.system('python finish.py')
+            break
         if rim:
             x1 = x
             y1 = y
@@ -248,6 +211,8 @@ while 1:
                     sc.blit(zv, (76, 266))
                 sc.blit(imagek1, (x, y))
                 sc.blit(image1, (x1 + 38, y1 + 16))
+                for i in range(len(mine)):
+                    sc.blit(mina, (mine[i][0], mine[i][1]))
                 pygame.display.update()
                 if (x1 == 76 - 38 or x1 == 76 or x1 == 76 - 38 - 38) and y == 266:
                     mark1 = False
@@ -267,11 +232,16 @@ while 1:
         sc.blit(bg, (0, 0))
         sc.blit(prep, (76, 76))
         sc.blit(prep2, (76, 152))
+        for i in range(len(mine)):
+            sc.blit(mina, (mine[i][0], mine[i][1]))
         if mark1:
             sc.blit(prep1, (76, 266))
         elif not mark1 and not mata:
             sc.blit(zv, (76, 266))
         sc.blit(imagek2, (x, y))
+        if death:
+            os.system('python finish.py')
+            break
         if rim:
             x1 = x
             y1 = y
@@ -281,6 +251,8 @@ while 1:
                 sc.blit(bg, (0, 0))
                 sc.blit(prep, (76, 76))
                 sc.blit(prep2, (76, 152))
+                for i in range(len(mine)):
+                    sc.blit(mina, (mine[i][0], mine[i][1]))
                 if mark1:
                     sc.blit(prep1, (76, 266))
                 elif not mark1 and not mata:
@@ -306,11 +278,16 @@ while 1:
         sc.blit(bg, (0, 0))
         sc.blit(prep, (76, 76))
         sc.blit(prep2, (76, 152))
+        for i in range(len(mine)):
+            sc.blit(mina, (mine[i][0], mine[i][1]))
         if mark1:
             sc.blit(prep1, (76, 266))
         elif not mark1 and not mata:
             sc.blit(zv, (76, 266))
         sc.blit(imagek3, (x, y))
+        if death:
+            os.system('python finish.py')
+            break
         if rim:
             x1 = x
             y1 = y
@@ -320,6 +297,8 @@ while 1:
                 sc.blit(bg, (0, 0))
                 sc.blit(prep, (76, 76))
                 sc.blit(prep2, (76, 152))
+                for i in range(len(mine)):
+                    sc.blit(mina, (mine[i][0], mine[i][1]))
                 if mark1:
                     sc.blit(prep1, (76, 266))
                 elif not mark1 and not mata:
@@ -343,6 +322,7 @@ while 1:
                     break
     if mata:
         kount = 100
-        draw_game_over()
+        os.system('python finish.py')
+        running = False
     pygame.display.update()
     clock.tick(FPS)
