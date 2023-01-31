@@ -1,0 +1,44 @@
+import pygame
+import sys
+import os
+
+pygame.font.init()
+W = 570
+H = 570
+BLUE = (0, 70, 225)
+
+sc = pygame.display.set_mode((W, H))
+
+
+def draw_game_over():
+    words = pygame.font.SysFont('calibri', 35)
+    word = pygame.font.SysFont('calibri', 25)
+    text_gameover = words.render('Игра завершена!', True, 'white')
+    f = open('database.txt', 'r')
+    USERNAME = f.read()
+    f.close()
+    f = open("database.txt", 'w')
+    f.truncate(0)
+    f.close()
+    text_score = words.render(f'Cчет игрока {USERNAME}: {100}', True, 'white')
+    text_i = word.render('Для рестарта игры нажмите клавишу пробел', True, 'white')
+    imgtank = pygame.image.load('tanki.jpg')
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit(0)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    os.system('python start.py')
+
+        sc.fill('black')
+        sc.blit(text_gameover, (230, 60))
+        sc.blit(pygame.transform.scale(imgtank, [200, 200]), [10, 10])
+        sc.blit(text_score, (30, 250))
+        sc.blit(text_i, (15, 400))
+        pygame.display.update()
+        sc.fill('black')
+
+
+draw_game_over()
