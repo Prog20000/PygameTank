@@ -1,0 +1,54 @@
+import pygame
+import sys
+import os
+
+pygame.font.init()
+W = 570
+H = 570
+BLUE = (0, 70, 225)
+
+sc = pygame.display.set_mode((W, H))
+
+
+def draw_intro():
+    imgtank = pygame.image.load('tanki.jpg')
+    words = pygame.font.SysFont('calibri', 45)
+    text_welcome = words.render('Игра "Танки"', True, 'white')
+    name = 'Введите имя:'
+    is_find_name = False
+    while not is_find_name:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit(0)
+            elif event.type == pygame.KEYDOWN:
+                if event.unicode.isalpha():
+                    if name == 'Введите имя:':
+                        name = event.unicode
+                    else:
+                        name += event.unicode
+                elif event.key == pygame.K_BACKSPACE:
+                    name = name[:-1]
+                elif event.key == pygame.K_RETURN:
+                    if len(name) > 2:
+                        global USERNAME
+                        f = open('database.txt', 'w')
+                        USERNAME = name
+                        f.write(USERNAME)
+                        f.close()
+                        is_find_name = True
+                        os.system('python main.py')
+                        break
+
+        sc.fill('black')
+        text_name = words.render(name, True, 'white')
+        rect_name = text_name.get_rect()
+        rect_name.center = sc.get_rect().center
+        sc.blit(pygame.transform.scale(imgtank, [200, 200]), [10, 10])
+        sc.blit(text_welcome, (250, 60))
+        sc.blit(text_name, rect_name)
+        pygame.display.update()
+        sc.fill('black')
+
+
+draw_intro()
