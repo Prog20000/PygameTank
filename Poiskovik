@@ -19,17 +19,15 @@ sc = pygame.display.set_mode((W, H))
 words = pygame.font.SysFont('calibri', 45)
 text_welcome = words.render('Поисковик', True, 'black')
 name = 'Введите адрес:'
-name1 = "Введите масштаб:"
-mas = 0.05
 to_find = 0
 is_find_name = False
-while not is_find_name:
+while 1:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit(0)
         elif event.type == pygame.KEYDOWN:
-            if event.unicode.isalpha() or event.unicode in ',:; 0.123456789':
+            if event.unicode.isalpha():
                 if name == 'Введите адрес:':
                     name = event.unicode
                 else:
@@ -37,10 +35,7 @@ while not is_find_name:
             elif event.key == pygame.K_BACKSPACE:
                 name = name[:-1]
             elif event.key == pygame.K_RETURN:
-                ura = list(name)
-                gi = ura.index(';')
-                USERNAME = name[:gi]
-                mas = name[gi + 1:]
+                USERNAME = name
                 is_find_name = True
     if is_find_name:
         toponym_to_find = name
@@ -68,7 +63,7 @@ while not is_find_name:
         # Долгота и широта:
         toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
 
-        delta = mas
+        delta = "0.05"
 
         # Собираем параметры для запроса к StaticMapsAPI:
         map_params = {
@@ -83,6 +78,7 @@ while not is_find_name:
 
         Image.open(BytesIO(
             response.content)).show()
+        is_find_name = False
 
     sc.fill('white')
     text_name = words.render(name, True, 'black')
@@ -92,4 +88,5 @@ while not is_find_name:
     sc.blit(text_name, rect_name)
     pygame.display.update()
     sc.fill('black')
+
 
